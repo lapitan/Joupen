@@ -1,0 +1,4 @@
+name: LoginPluginForJoutak
+version: '1.0-SNAPSHOT'
+main: org.joutak.loginpluginforjoutak.LoginPluginForJoutak
+api-version: '1.20'
