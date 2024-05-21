@@ -56,7 +56,7 @@ public final class ResourcesJsonReader {
     private static String getPropertyAsString(JsonObject jsonObject, String propertyName) {
         try {
             return jsonObject.get(propertyName).toString().replace("\"", "");
-        } catch (Exception e){
+        } catch (Exception e) {
             return "";
         }
     }

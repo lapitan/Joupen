@@ -28,7 +28,7 @@ public class PlayerJoinEventHandler implements EventListener, Listener {
 
         PlayerDto playerDto = PlayerDtosUtils.findPlayerByName(playerLoginEvent.getPlayer().getName());
 
-        if (playerDto == null){
+        if (playerDto == null) {
             TextComponent textComponent = Component.text()
                     .append(Component.text("Тебя нет в вайтлисте. Напиши по этому поводу ", NamedTextColor.BLUE))
                     .append(Component.text("EnderDiss'e", NamedTextColor.RED))
@@ -46,7 +46,7 @@ public class PlayerJoinEventHandler implements EventListener, Listener {
             return;
         }
 
-        if (!playerDto.getUuid().equals(playerLoginEvent.getPlayer().getUniqueId().toString())){
+        if (!playerDto.getUuid().equals(playerLoginEvent.getPlayer().getUniqueId().toString())) {
             Reader reader = new JsonReaderImpl(JoutakLoginProperties.saveFilepath);
             Writer writer = new JsonWriterImpl(JoutakLoginProperties.saveFilepath);
 

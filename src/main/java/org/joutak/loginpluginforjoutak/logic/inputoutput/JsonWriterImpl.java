@@ -10,7 +10,6 @@ import org.joutak.loginpluginforjoutak.utils.JoutakLoginProperties;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
 
 @Slf4j
 public class JsonWriterImpl implements Writer {

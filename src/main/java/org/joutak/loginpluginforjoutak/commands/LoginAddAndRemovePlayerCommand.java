@@ -29,26 +29,6 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
     @Override
     public void execute(CommandSender commandSender, Command command, String string, String[] args) {
 
-//        List<PlayerDto> playerDtos = List.of(
-//                PlayerDto.builder()
-//                        .name("1")
-//                        .uuid("1")
-//                        .lastProlongDate("2025-01-30")
-//                        .prolongTimeInMonths(1).build(),
-//                PlayerDto.builder()
-//                        .name("2")
-//                        .uuid("2")
-//                        .lastProlongDate("2023-05-20")
-//                        .prolongTimeInMonths(10).build()
-//        );
-//
-//        LocalDate player1 = PlayerDtoCalendarConverter.getLastProlongDate(playerDtos.get(0));
-//        LocalDate player2 = PlayerDtoCalendarConverter.getCurrentProlongDate(playerDtos.get(1));
-//
-//        System.out.println(player1);
-//        player1 = player1.plusMonths(1);
-//        System.out.println(player1);
-
         if (args.length < 1) {
             TextComponent textComponent = Component.text("Wrong amount of arguments. Try /jouhodka help", NamedTextColor.GOLD)
                     .toBuilder().build();
@@ -205,7 +185,7 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
         }
 
         LocalDate localDate = PlayerDtoCalendarConverter.getValidUntil(playerDto);
-        localDate = localDate.plusDays(30L *daysMultiplier);
+        localDate = localDate.plusDays(30L * daysMultiplier);
         playerDto.setValidUntil(localDate.format(JoutakLoginProperties.dateTimeFormatter));
 
         Reader reader = new JsonReaderImpl(JoutakLoginProperties.saveFilepath);
@@ -218,7 +198,7 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
         writer.write(playerDtos);
 
         Bukkit.broadcast(Component.text("A FRIEND" + args[1] +
-                " (SLAVE) PAYED FOR ANOTHER " + 30*daysMultiplier +" DAYS OF FRIENDSHIP (SLAVERY). YAY!! (yay??)", NamedTextColor.AQUA));
+                " (SLAVE) PAYED FOR ANOTHER " + 30 * daysMultiplier + " DAYS OF FRIENDSHIP (SLAVERY). YAY!! (yay??)", NamedTextColor.AQUA));
         TextComponent textComponent = Component.text("Added new player to the whitelist: " + args[1], NamedTextColor.RED);
         commandSender.sendMessage(textComponent);
         log.warn("Added new player to the whitelist: {}", args[1]);

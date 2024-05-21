@@ -4,7 +4,6 @@ import org.joutak.loginpluginforjoutak.logic.dto.PlayerDto;
 import org.joutak.loginpluginforjoutak.utils.JoutakLoginProperties;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 public final class PlayerDtoCalendarConverter {
     public static LocalDate getLastProlongDate(PlayerDto playerDto) {
