@@ -7,6 +7,11 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ArmorMeta;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.trim.ArmorTrim;
+import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.joutak.loginpluginforjoutak.logic.dto.PlayerDto;
 import org.joutak.loginpluginforjoutak.logic.dto.PlayerDtos;
 import org.joutak.loginpluginforjoutak.logic.dto.converter.PlayerDtoCalendarConverter;
@@ -23,14 +28,14 @@ import java.time.LocalDate;
 public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
 
     public LoginAddAndRemovePlayerCommand() {
-        super("jouhodka");
+        super("joupen");
     }
 
     @Override
     public void execute(CommandSender commandSender, Command command, String string, String[] args) {
 
         if (args.length < 1) {
-            TextComponent textComponent = Component.text("Wrong amount of arguments. Try /jouhodka help", NamedTextColor.GOLD)
+            TextComponent textComponent = Component.text("Wrong amount of arguments. Try /joupen help", NamedTextColor.GOLD)
                     .toBuilder().build();
             commandSender.sendMessage(textComponent);
         }
@@ -63,16 +68,20 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
 
     private void helpCommand(CommandSender commandSender) {
         TextComponent textComponent = Component.text()
+                .append(Component.text("JouHodka", NamedTextColor.GOLD))
+                .appendNewline()
+                .append(Component.text("Вайтлист плагин для ДжоуТека", NamedTextColor.GOLD))
+                .appendNewline()
                 .append(Component.text("Help:", NamedTextColor.BLUE))
                 .appendNewline()
-                .append(Component.text("/jouhodka help", NamedTextColor.GREEN))
-                .append(Component.text(" - shows you this page", NamedTextColor.BLUE))
+                .append(Component.text("/joupen help", NamedTextColor.GREEN))
+                .append(Component.text(" - показывает эту страницу", NamedTextColor.BLUE))
                 .appendNewline()
-                .append(Component.text("/jouhodka prolong <player> {months}", NamedTextColor.GREEN))
-                .append(Component.text(" - add player to whitelist for number of months. Default: 1", NamedTextColor.BLUE))
+                .append(Component.text("/joupen prolong <player> [amount] [d/m]", NamedTextColor.GREEN))
+                .append(Component.text(" - добавляет игрока на какое-то время. Default: 1 month", NamedTextColor.BLUE))
                 .appendNewline()
-                .append(Component.text("/jouhodka info {for OP: player}", NamedTextColor.GREEN))
-                .append(Component.text(" - shows Jouhodka info about You. Operators can check info about any player", NamedTextColor.BLUE))
+                .append(Component.text("/joupen info {for OP: player}", NamedTextColor.GREEN))
+                .append(Component.text(" - показывает информацию о вашей проходке. Админ может смотреть всех игроков", NamedTextColor.BLUE))
                 .appendNewline()
                 .append(Component.text("Developed by ", NamedTextColor.GRAY))
                 .append(Component.text("Lapitaniy ", NamedTextColor.DARK_AQUA))
@@ -87,7 +96,7 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
 
     private void infoCommand(CommandSender commandSender, String[] args) {
         if (args.length > 1) {
-            if (checkPermission(commandSender, "operator")) {
+            if (checkPermission(commandSender, "joupen.admin")) {
                 return;
             }
             PlayerDto playerDto = PlayerDtosUtils.findPlayerByName(args[1]);
@@ -99,16 +108,16 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
             }
 
             TextComponent textComponent = Component.text()
-                    .append(Component.text("Player's Name:", NamedTextColor.GREEN))
+                    .append(Component.text("Ник Игрока:", NamedTextColor.GREEN))
                     .append(Component.text(playerDto.getName(), NamedTextColor.BLUE))
                     .appendNewline()
-                    .append(Component.text("Player's UUID:", NamedTextColor.GREEN))
+                    .append(Component.text("UUID Игрока:", NamedTextColor.GREEN))
                     .append(Component.text(playerDto.getUuid(), NamedTextColor.BLUE))
                     .appendNewline()
-                    .append(Component.text("Player's last prolong date: ", NamedTextColor.GREEN))
+                    .append(Component.text("Последняя дата продления проходки: ", NamedTextColor.GREEN))
                     .append(Component.text(playerDto.getLastProlongDate(), NamedTextColor.BLUE))
                     .appendNewline()
-                    .append(Component.text("Player's Jouhodka valid until: ", NamedTextColor.GREEN))
+                    .append(Component.text("Проходка активна до: ", NamedTextColor.GREEN))
                     .append(Component.text(playerDto.getValidUntil(), NamedTextColor.BLUE))
                     .build();
 
@@ -128,16 +137,16 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
         }
 
         TextComponent textComponent = Component.text()
-                .append(Component.text("Your Name:", NamedTextColor.GREEN))
+                .append(Component.text("Твой Ник:", NamedTextColor.GREEN))
                 .append(Component.text(playerDto.getName(), NamedTextColor.BLUE))
                 .appendNewline()
-                .append(Component.text("Your UUID:", NamedTextColor.GREEN))
+                .append(Component.text("Твой UUID:", NamedTextColor.GREEN))
                 .append(Component.text(playerDto.getUuid(), NamedTextColor.BLUE))
                 .appendNewline()
-                .append(Component.text("Your last prolong date: ", NamedTextColor.GREEN))
+                .append(Component.text("Последняя дата продления проходки: ", NamedTextColor.GREEN))
                 .append(Component.text(playerDto.getLastProlongDate(), NamedTextColor.BLUE))
                 .appendNewline()
-                .append(Component.text("Your Jouhodka valid until: ", NamedTextColor.GREEN))
+                .append(Component.text("Проходка активна до: ", NamedTextColor.GREEN))
                 .append(Component.text(playerDto.getValidUntil(), NamedTextColor.BLUE))
                 .build();
 
@@ -145,7 +154,7 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
     }
 
     private void prolongCommand(CommandSender commandSender, String[] args) {
-        if (checkPermission(commandSender, "operator")) {
+        if (checkPermission(commandSender, "joupen.admin")) {
             return;
         }
         if (args.length < 2) {
@@ -156,9 +165,17 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
         }
         Writer writer = new JsonWriterImpl(JoutakLoginProperties.saveFilepath);
         PlayerDto playerDto = PlayerDtosUtils.findPlayerByName(args[1]);
-        Integer daysMultiplier = 1;
+        Integer daysAmount = 30;
         if (args.length >= 3) {
-            daysMultiplier = Integer.parseInt(args[2]);
+            if (args.length >= 4) {
+                if (args[3].equals("d")) {
+                    daysAmount = Integer.parseInt(args[2]);
+                } else {
+                    daysAmount = 30 * Integer.parseInt(args[2]);
+                }
+            } else {
+                daysAmount = 30 * Integer.parseInt(args[2]);
+            }
         }
 
         if (playerDto == null) {
@@ -166,13 +183,17 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
             playerDto.setName(args[1]);
             LocalDate localDate = LocalDate.now();
             playerDto.setLastProlongDate(localDate.format(JoutakLoginProperties.dateTimeFormatter));
-            LocalDate validUntil = localDate.plusDays(30L * daysMultiplier);
+            LocalDate validUntil = localDate.plusDays(daysAmount);
             playerDto.setValidUntil(validUntil.format(JoutakLoginProperties.dateTimeFormatter));
             playerDto.setUuid("-1");
             writer.addNew(playerDto);
-            Bukkit.broadcast(Component.text("A NEW FRIEND" + args[1] +
-                    " (SLAVE) HAS BEEN ADDED TO THE WHITELIST. YAY!! (yay??)", NamedTextColor.AQUA));
-            TextComponent textComponent = Component.text("Added new player to the whitelist: " + args[1], NamedTextColor.RED);
+            TextComponent textComponent = Component.text()
+                    .append(Component.text("Новый Игрок ", NamedTextColor.AQUA))
+                    .append(Component.text(args[1], NamedTextColor.YELLOW))
+                    .append(Component.text("впервые оплатил проходку! Ура!", NamedTextColor.AQUA))
+                    .build();
+            Bukkit.broadcast(textComponent);
+            textComponent = Component.text("Added new player to the whitelist: " + args[1], NamedTextColor.RED);
             commandSender.sendMessage(textComponent);
             log.warn("Added new player to the whitelist: {}", args[1]);
             return;
@@ -185,7 +206,7 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
         }
 
         LocalDate localDate = PlayerDtoCalendarConverter.getValidUntil(playerDto);
-        localDate = localDate.plusDays(30L * daysMultiplier);
+        localDate = localDate.plusDays(daysAmount);
         playerDto.setValidUntil(localDate.format(JoutakLoginProperties.dateTimeFormatter));
 
         Reader reader = new JsonReaderImpl(JoutakLoginProperties.saveFilepath);
@@ -197,12 +218,18 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
 
         writer.write(playerDtos);
 
-        Bukkit.broadcast(Component.text("A FRIEND" + args[1] +
-                " (SLAVE) PAYED FOR ANOTHER " + 30 * daysMultiplier + " DAYS OF FRIENDSHIP (SLAVERY). YAY!! (yay??)", NamedTextColor.AQUA));
-        TextComponent textComponent = Component.text("Added new player to the whitelist: " + args[1], NamedTextColor.RED);
+        TextComponent textComponent = Component.text()
+                .append(Component.text("Игрок ", NamedTextColor.AQUA))
+                .append(Component.text(args[1], NamedTextColor.YELLOW))
+                .append(Component.text(" продлил проходку на еще ", NamedTextColor.AQUA))
+                .append(Component.text(daysAmount, NamedTextColor.YELLOW))
+                .append(Component.text(" дней. Ура!"))
+                .build();
+
+        Bukkit.broadcast(textComponent);
+        textComponent = Component.text("Added new player to the whitelist: " + args[1], NamedTextColor.RED);
         commandSender.sendMessage(textComponent);
         log.warn("Added new player to the whitelist: {}", args[1]);
-
     }
 
 }
