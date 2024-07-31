@@ -164,6 +164,9 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
             commandSender.sendMessage(textComponent);
         }
         Writer writer = new JsonWriterImpl(JoutakLoginProperties.saveFilepath);
+
+
+
         PlayerDto playerDto = PlayerDtosUtils.findPlayerByName(args[1]);
         Integer daysAmount = 30;
         if (args.length >= 3) {
@@ -199,7 +202,7 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
             return;
         }
 
-        if (PlayerDtoCalendarConverter.getLastProlongDate(playerDto).isBefore(LocalDate.now())) {
+        if (PlayerDtoCalendarConverter.getValidUntil(playerDto).isBefore(LocalDate.now())) {
             LocalDate localDate = LocalDate.now();
             playerDto.setLastProlongDate(localDate.format(JoutakLoginProperties.dateTimeFormatter));
             playerDto.setValidUntil(localDate.format(JoutakLoginProperties.dateTimeFormatter));

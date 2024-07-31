@@ -1,6 +1,7 @@
 package org.joutak.loginpluginforjoutak.logic.dto.utils;
 
 import org.joutak.loginpluginforjoutak.logic.dto.PlayerDto;
+import org.joutak.loginpluginforjoutak.logic.dto.PlayerDtos;
 import org.joutak.loginpluginforjoutak.logic.inputoutput.JsonReaderImpl;
 import org.joutak.loginpluginforjoutak.logic.inputoutput.Reader;
 import org.joutak.loginpluginforjoutak.utils.JoutakLoginProperties;
