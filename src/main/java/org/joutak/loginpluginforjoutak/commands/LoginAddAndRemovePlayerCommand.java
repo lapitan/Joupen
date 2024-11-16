@@ -159,9 +159,10 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
         }
         if (args.length < 2) {
             TextComponent textComponent = Component.text("Wrong amount of arguments." +
-                    " Try /jouhodka help", NamedTextColor.RED);
+                    " Try /joupen help", NamedTextColor.RED);
 
             commandSender.sendMessage(textComponent);
+            return;
         }
         Writer writer = new JsonWriterImpl(JoutakLoginProperties.saveFilepath);
 
