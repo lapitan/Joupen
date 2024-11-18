@@ -23,8 +23,7 @@ public final class ResourcesJsonReader {
             log.error("can't read a properties file with filepath: {}", filepath);
         }
         if (json == null) {
-            log.error("properties file is empty. " +
-                    "WTF?");
+            log.error("properties file is empty. WTF?");
             return;
         }
 
