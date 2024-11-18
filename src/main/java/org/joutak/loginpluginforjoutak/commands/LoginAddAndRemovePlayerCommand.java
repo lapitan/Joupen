@@ -159,9 +159,10 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
         }
         if (args.length < 2) {
             TextComponent textComponent = Component.text("Wrong amount of arguments." +
-                    " Try /jouhodka help", NamedTextColor.RED);
+                    " Try /joupen help", NamedTextColor.RED);
 
             commandSender.sendMessage(textComponent);
+            return;
         }
         Writer writer = new JsonWriterImpl(JoutakLoginProperties.saveFilepath);
 
@@ -193,7 +194,7 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
             TextComponent textComponent = Component.text()
                     .append(Component.text("Новый Игрок ", NamedTextColor.AQUA))
                     .append(Component.text(args[1], NamedTextColor.YELLOW))
-                    .append(Component.text("впервые оплатил проходку! Ура!", NamedTextColor.AQUA))
+                    .append(Component.text(" впервые оплатил проходку! Ура!", NamedTextColor.AQUA))
                     .build();
             Bukkit.broadcast(textComponent);
             textComponent = Component.text("Added new player to the whitelist: " + args[1], NamedTextColor.RED);
