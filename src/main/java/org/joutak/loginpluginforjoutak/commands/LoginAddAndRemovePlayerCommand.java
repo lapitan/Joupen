@@ -48,8 +48,6 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
             prolongCommand(commandSender, args);
         }
 
-        System.out.println(args.length);
-
     }
 
     private boolean checkPermission(CommandSender commandSender, String permission) {
