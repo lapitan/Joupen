@@ -18,7 +18,6 @@ import org.joutak.loginpluginforjoutak.logic.inputoutput.Writer;
 import org.joutak.loginpluginforjoutak.utils.JoutakLoginProperties;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Slf4j
 public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
@@ -168,7 +167,7 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
         LocalDate now = LocalDate.now();
 
         // parse period
-        int daysAmount = 30;
+        int daysAmount;
         if (args.length >= 3) {
             if (args.length >= 4) {
                 if (args[3].equals("d")) {
@@ -179,24 +178,26 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
             } else {
                 daysAmount = 30 * Integer.parseInt(args[2]);
             }
+        } else {
+            daysAmount = 30;
         }
 
         // if all, gift everyone
         if (args[1].equals("all")) {
             PlayerDtos playerDtos = reader.read();
-            List<PlayerDto> playerDtoList = playerDtos.getPlayerDtoList();
-            for (int i = 0; i < playerDtoList.size(); i++) {
-                PlayerDto player = playerDtoList.get(i);
-                LocalDate validUntil = PlayerDtoCalendarConverter.getValidUntil(player);
-                if (validUntil.isBefore(now)) {
-                    validUntil = now;
-                }
-                validUntil = validUntil.plusDays(daysAmount);
-                player.setValidUntil(validUntil.format(JoutakLoginProperties.dateTimeFormatter));
-                playerDtoList.set(i, player);
-            }
-            playerDtos.setPlayerDtoList(playerDtoList);
+            playerDtos.getPlayerDtoList().forEach(
+                    player -> {
+                        LocalDate validUntil = PlayerDtoCalendarConverter.getValidUntil(player);
+                        if (validUntil.isBefore(now)) {
+                            validUntil = now;
+                        }
+                        validUntil = validUntil.plusDays(daysAmount);
+                        player.setValidUntil(validUntil.format(JoutakLoginProperties.dateTimeFormatter));
+                    }
+            );
             writer.write(playerDtos);
+            TextComponent textComponent = Component.text("Gave everyone " + daysAmount + " days", NamedTextColor.RED);
+            commandSender.sendMessage(textComponent);
             return;
         }
 
@@ -204,21 +205,14 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
         PlayerDto playerDto = PlayerDtosUtils.findPlayerByName(args[1]);
 
         // init if new
+        boolean isNew = false;
         if (playerDto == null) {
+            isNew = true;
             playerDto = new PlayerDto();
             playerDto.setName(args[1]);
             playerDto.setLastProlongDate(now.minusDays(1).format(JoutakLoginProperties.dateTimeFormatter));
+            playerDto.setValidUntil(now.minusDays(1).format(JoutakLoginProperties.dateTimeFormatter));
             playerDto.setUuid("-1");
-            TextComponent textComponent = Component.text()
-                    .append(Component.text("Новый Игрок ", NamedTextColor.AQUA))
-                    .append(Component.text(args[1], NamedTextColor.YELLOW))
-                    .append(Component.text(" впервые оплатил проходку! Ура!", NamedTextColor.AQUA))
-                    .build();
-            Bukkit.broadcast(textComponent);
-            textComponent = Component.text("Added new player to the whitelist: " + args[1], NamedTextColor.RED);
-            commandSender.sendMessage(textComponent);
-            log.warn("Added new player to the whitelist: {}", args[1]);
-            return;
         }
 
         LocalDate validUntil = PlayerDtoCalendarConverter.getValidUntil(playerDto);
@@ -239,19 +233,29 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
         playerDtos.getPlayerDtoList().add(playerDto);
 
         writer.write(playerDtos);
-
-        TextComponent textComponent = Component.text()
-                .append(Component.text("Игрок ", NamedTextColor.AQUA))
-                .append(Component.text(args[1], NamedTextColor.YELLOW))
-                .append(Component.text(" продлил проходку на еще ", NamedTextColor.AQUA))
-                .append(Component.text(daysAmount, NamedTextColor.YELLOW))
-                .append(Component.text(" дней. Ура!"))
-                .build();
-
-        Bukkit.broadcast(textComponent);
-        textComponent = Component.text("Added new player to the whitelist: " + args[1], NamedTextColor.RED);
-        commandSender.sendMessage(textComponent);
-        log.warn("Added new player to the whitelist: {}", args[1]);
+        if (!isNew) {
+            TextComponent textComponent = Component.text()
+                    .append(Component.text("Игрок ", NamedTextColor.AQUA))
+                    .append(Component.text(args[1], NamedTextColor.YELLOW))
+                    .append(Component.text(" продлил проходку на еще ", NamedTextColor.AQUA))
+                    .append(Component.text(daysAmount, NamedTextColor.YELLOW))
+                    .append(Component.text(" дней. Ура!", NamedTextColor.AQUA))
+                    .build();
+            Bukkit.broadcast(textComponent);
+            textComponent = Component.text("Added player to the whitelist: " + args[1], NamedTextColor.RED);
+            commandSender.sendMessage(textComponent);
+            log.warn("Added player to the whitelist: {}", args[1]);
+        } else {
+            TextComponent textComponent = Component.text()
+                    .append(Component.text("Новый игрок ", NamedTextColor.AQUA))
+                    .append(Component.text(args[1], NamedTextColor.YELLOW))
+                    .append(Component.text(" впервые оплатил проходку! Ура!", NamedTextColor.AQUA))
+                    .build();
+            Bukkit.broadcast(textComponent);
+            textComponent = Component.text("Added new player to the whitelist: " + args[1], NamedTextColor.RED);
+            commandSender.sendMessage(textComponent);
+            log.warn("Added new player to the whitelist: {}", args[1]);
+        }
     }
 
 }
