@@ -21,4 +21,6 @@ public class PlayerDto {
 
     String validUntil;
 
+    Boolean paid = true;
+
 }
