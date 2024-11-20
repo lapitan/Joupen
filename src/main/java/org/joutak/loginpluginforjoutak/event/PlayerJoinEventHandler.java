@@ -27,8 +27,6 @@ public class PlayerJoinEventHandler implements EventListener, Listener {
     public void playerJoinEvent(PlayerLoginEvent playerLoginEvent) {
 
         PlayerDto playerDto = PlayerDtosUtils.findPlayerByName(playerLoginEvent.getPlayer().getName());
-        PlayerDto allDto = PlayerDtosUtils.findPlayerByName("all");
-
         if (playerDto == null) {
             TextComponent textComponent = Component.text()
                     .append(Component.text("Тебя нет в вайтлисте. Напиши по этому поводу ", NamedTextColor.BLUE))
@@ -38,8 +36,7 @@ public class PlayerJoinEventHandler implements EventListener, Listener {
             return;
         }
 
-        if (PlayerDtoCalendarConverter.getValidUntil(playerDto).isBefore(LocalDate.now())
-                && PlayerDtoCalendarConverter.getValidUntil(allDto).isBefore(LocalDate.now())) {
+        if (PlayerDtoCalendarConverter.getValidUntil(playerDto).isBefore(LocalDate.now())) {
             TextComponent textComponent = Component.text()
                     .append(Component.text("Проходка кончилась((( Надо оплатить и написать ", NamedTextColor.BLUE))
                     .append(Component.text("EnderDiss'e", NamedTextColor.RED))
