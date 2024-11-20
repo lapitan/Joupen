@@ -44,7 +44,11 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
         }
 
         if (args[0].equals("prolong")) {
-            prolongCommand(commandSender, args);
+            prolongCommand(commandSender, args, false);
+        }
+
+        if (args[0].equals("gift")) {
+            prolongCommand(commandSender, args, true);
         }
 
     }
@@ -72,6 +76,9 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
                 .appendNewline()
                 .append(Component.text("/joupen prolong <player> [amount] [d/m]", NamedTextColor.GREEN))
                 .append(Component.text(" - добавляет игрока на какое-то время. Default: 1 month", NamedTextColor.BLUE))
+                .appendNewline()
+                .append(Component.text("/joupen gift <player> [amount] [d/m]", NamedTextColor.GREEN))
+                .append(Component.text(" - добавляет бесплатного игрока на какое-то время. Default: 1 month", NamedTextColor.BLUE))
                 .appendNewline()
                 .append(Component.text("/joupen info {for OP: player}", NamedTextColor.GREEN))
                 .append(Component.text(" - показывает информацию о вашей проходке. Админ может смотреть всех игроков", NamedTextColor.BLUE))
@@ -146,7 +153,8 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
         commandSender.sendMessage(textComponent);
     }
 
-    private void prolongCommand(CommandSender commandSender, String[] args) {
+
+    private void prolongCommand(CommandSender commandSender, String[] args, boolean gift) {
         // check perms
         if (checkPermission(commandSender, "joupen.admin")) {
             return;
@@ -187,6 +195,9 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
             PlayerDtos playerDtos = reader.read();
             playerDtos.getPlayerDtoList().forEach(
                     player -> {
+                        if (!player.getPaid() && !gift) {
+                            return;
+                        }
                         LocalDate validUntil = PlayerDtoCalendarConverter.getValidUntil(player);
                         if (validUntil.isBefore(now)) {
                             validUntil = now;
@@ -210,6 +221,7 @@ public class LoginAddAndRemovePlayerCommand extends AbstractCommand {
             isNew = true;
             playerDto = new PlayerDto();
             playerDto.setName(args[1]);
+            playerDto.setPaid(!gift);
             playerDto.setLastProlongDate(now.minusDays(1).format(JoutakLoginProperties.dateTimeFormatter));
             playerDto.setValidUntil(now.minusDays(1).format(JoutakLoginProperties.dateTimeFormatter));
             playerDto.setUuid("-1");
