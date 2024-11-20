@@ -18,6 +18,7 @@ import org.joutak.loginpluginforjoutak.logic.inputoutput.Writer;
 import org.joutak.loginpluginforjoutak.utils.JoutakLoginProperties;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.EventListener;
 
 @Slf4j
@@ -44,10 +45,26 @@ public class PlayerJoinEventHandler implements EventListener, Listener {
             playerLoginEvent.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, textComponent);
             return;
         }
-
-        if (!playerDto.getUuid().equals(playerLoginEvent.getPlayer().getUniqueId().toString())) {
-            Reader reader = new JsonReaderImpl(JoutakLoginProperties.saveFilepath);
+        String uuid = playerDto.getUuid();
+        if (uuid.equals("-1")) {
             Writer writer = new JsonWriterImpl(JoutakLoginProperties.saveFilepath);
+            Reader reader = new JsonReaderImpl(JoutakLoginProperties.saveFilepath);
+
+            PlayerDtos playerDtos = reader.read();
+            playerDtos.getPlayerDtoList().remove(playerDto);
+            LocalDate now = LocalDate.now();
+            LocalDate validUntil = PlayerDtoCalendarConverter.getValidUntil(playerDto);
+            LocalDate lastProlongDate = PlayerDtoCalendarConverter.getLastProlongDate(playerDto);
+            validUntil = validUntil.plusDays(ChronoUnit.DAYS.between(lastProlongDate, now));
+            playerDto.setValidUntil(validUntil.format(JoutakLoginProperties.dateTimeFormatter));
+            playerDto.setLastProlongDate(now.format(JoutakLoginProperties.dateTimeFormatter));
+            playerDtos.getPlayerDtoList().add(playerDto);
+            writer.write(playerDtos);
+            log.warn("Player {} joined for the first time, adjusted prohodka", playerDto.getName());
+        }
+        if (!uuid.equals(playerLoginEvent.getPlayer().getUniqueId().toString())) {
+            Writer writer = new JsonWriterImpl(JoutakLoginProperties.saveFilepath);
+            Reader reader = new JsonReaderImpl(JoutakLoginProperties.saveFilepath);
 
             PlayerDtos playerDtos = reader.read();
             playerDtos.getPlayerDtoList().remove(playerDto);
