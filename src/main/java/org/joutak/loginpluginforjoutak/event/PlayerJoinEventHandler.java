@@ -27,7 +27,21 @@ public class PlayerJoinEventHandler implements EventListener, Listener {
     @EventHandler
     public void playerJoinEvent(PlayerLoginEvent playerLoginEvent) {
 
-        PlayerDto playerDto = PlayerDtosUtils.findPlayerByName(playerLoginEvent.getPlayer().getName());
+        PlayerDto playerDto = PlayerDtosUtils.findPlayerByUuid(playerLoginEvent.getPlayer().getUniqueId());
+        if (playerDto == null) {
+            playerDto = PlayerDtosUtils.findPlayerByName(playerLoginEvent.getPlayer().getName());
+        } else if (!playerDto.getName().equals(playerLoginEvent.getPlayer().getName())) {
+            Writer writer = new JsonWriterImpl(JoutakLoginProperties.saveFilepath);
+            Reader reader = new JsonReaderImpl(JoutakLoginProperties.saveFilepath);
+
+            PlayerDtos playerDtos = reader.read();
+            playerDtos.getPlayerDtoList().remove(playerDto);
+            playerDto.setName(playerLoginEvent.getPlayer().getName());
+            playerDtos.getPlayerDtoList().add(playerDto);
+            writer.write(playerDtos);
+            log.warn("Player {} updated his nickname, adjusted in database.", playerDto.getName());
+        }
+
         if (playerDto == null) {
             TextComponent textComponent = Component.text()
                     .append(Component.text("Тебя нет в вайтлисте. Напиши по этому поводу ", NamedTextColor.BLUE))
@@ -58,20 +72,19 @@ public class PlayerJoinEventHandler implements EventListener, Listener {
             validUntil = validUntil.plusDays(ChronoUnit.DAYS.between(lastProlongDate, now));
             playerDto.setValidUntil(validUntil.format(JoutakLoginProperties.dateTimeFormatter));
             playerDto.setLastProlongDate(now.format(JoutakLoginProperties.dateTimeFormatter));
-            playerDtos.getPlayerDtoList().add(playerDto);
-            writer.write(playerDtos);
-            log.warn("Player {} joined for the first time, adjusted prohodka", playerDto.getName());
-        }
-        if (!uuid.equals(playerLoginEvent.getPlayer().getUniqueId().toString())) {
-            Writer writer = new JsonWriterImpl(JoutakLoginProperties.saveFilepath);
-            Reader reader = new JsonReaderImpl(JoutakLoginProperties.saveFilepath);
-
-            PlayerDtos playerDtos = reader.read();
-            playerDtos.getPlayerDtoList().remove(playerDto);
             playerDto.setUuid(playerLoginEvent.getPlayer().getUniqueId().toString());
             playerDtos.getPlayerDtoList().add(playerDto);
             writer.write(playerDtos);
-            log.warn("changed UUID of player {} to new one {}", playerDto.getName(), playerDto.getUuid());
+            log.warn("Player {} joined for the first time, adjusted prohodka and changed UUID", playerDto.getName());
+        }
+        if (!uuid.equals(playerLoginEvent.getPlayer().getUniqueId().toString())) {
+            TextComponent textComponent = Component.text()
+                    .append(Component.text("Твой UUID не совпадает с UUID на сервере. Если это ошибка, напиши об этом ", NamedTextColor.BLUE))
+                    .append(Component.text("EnderDiss'e", NamedTextColor.RED))
+                    .build();
+            playerLoginEvent.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, textComponent);
+            log.warn("Kicked player {} because of UUID mismatch", playerDto.getName());
+            return;
         }
 
         playerLoginEvent.allow();
