@@ -77,15 +77,6 @@ public class PlayerJoinEventHandler implements EventListener, Listener {
             writer.write(playerDtos);
             log.warn("Player {} joined for the first time, adjusted prohodka and changed UUID", playerDto.getName());
         }
-        if (!uuid.equals(playerLoginEvent.getPlayer().getUniqueId().toString())) {
-            TextComponent textComponent = Component.text()
-                    .append(Component.text("Твой UUID не совпадает с UUID на сервере. Если это ошибка, напиши об этом ", NamedTextColor.BLUE))
-                    .append(Component.text("EnderDiss'e", NamedTextColor.RED))
-                    .build();
-            playerLoginEvent.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, textComponent);
-            log.warn("Kicked player {} because of UUID mismatch", playerDto.getName());
-            return;
-        }
 
         playerLoginEvent.allow();
     }
